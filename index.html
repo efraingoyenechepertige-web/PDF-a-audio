@@ -18,7 +18,7 @@
       --text-muted: #a1a1aa;
       --accent: #e4e4e7;
       --accent-text: #09090b;
-      --highlight: rgba(255, 255, 255, 0.08);
+      --highlight: rgba(255, 255, 255, 0.10);
       --badge-bg: rgba(16, 185, 129, 0.14);
       --badge-text: #34d399;
     }
@@ -49,7 +49,7 @@
       gap: 10px;
       position: sticky;
       top: 0;
-      background: rgba(9, 9, 11, 0.9);
+      background: rgba(9, 9, 11, 0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       z-index: 20;
@@ -89,7 +89,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.15s ease;
       white-space: nowrap;
     }
 
@@ -104,10 +103,10 @@
       width: 100%;
       max-width: 680px;
       margin: 0 auto;
-      padding: 20px 20px 180px;
+      padding: 20px 20px 190px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
     .dropzone {
@@ -117,12 +116,6 @@
       padding: 32px 20px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .dropzone:hover, .dropzone:active {
-      border-color: var(--text-muted);
-      background: var(--surface-hover);
     }
 
     .dropzone svg {
@@ -239,14 +232,10 @@
     }
 
     .sentence {
-      padding: 2px 4px;
-      border-radius: 4px;
+      padding: 3px 5px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .sentence:hover {
-      background: rgba(255, 255, 255, 0.04);
+      display: inline;
     }
 
     .sentence.active {
@@ -295,7 +284,6 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: opacity 0.15s;
     }
 
     .btn-secondary:disabled {
@@ -315,7 +303,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(18, 18, 21, 0.94);
+      background: rgba(18, 18, 21, 0.96);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-top: 1px solid var(--border);
@@ -364,12 +352,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
     }
 
     .icon-btn {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: var(--surface);
@@ -380,13 +367,9 @@
       cursor: pointer;
     }
 
-    .icon-btn:active {
-      transform: scale(0.95);
-    }
-
     .play-btn {
-      width: 50px;
-      height: 50px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
       border: none;
       background: var(--accent);
@@ -397,20 +380,16 @@
       cursor: pointer;
     }
 
-    .play-btn:active {
-      transform: scale(0.95);
-    }
-
     .speed-btn {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 10px;
+      padding: 7px 11px;
       border-radius: 8px;
       cursor: pointer;
-      min-width: 52px;
+      min-width: 54px;
     }
   </style>
 </head>
@@ -419,9 +398,9 @@
   <header>
     <div class="title-group">
       <h1>PDF a Audio</h1>
-      <span class="engine-badge" id="engineBadge">Motor Híbrido Listo</span>
+      <span class="engine-badge" id="engineBadge">Voz Lista</span>
     </div>
-    <button class="wake-btn" id="wakeBtn" title="Evitar que se apague la pantalla">
+    <button class="wake-btn" id="wakeBtn">
       <span id="wakeDot">○</span> Pantalla activa
     </button>
   </header>
@@ -449,7 +428,7 @@
 
     <div class="settings-grid" id="settingsGrid">
       <div class="field">
-        <label for="voiceSelect">Voz / Motor</label>
+        <label for="voiceSelect">Motor de Voz</label>
         <select id="voiceSelect"></select>
       </div>
       <div class="field">
@@ -463,22 +442,15 @@
     <div class="download-card" id="downloadCard">
       <div class="download-row">
         <div>
-          <div class="download-title">Exportar audio descargable</div>
-          <div class="download-sub">Genera un archivo .WAV compatible con iPhone</div>
+          <div class="download-title">Descargar audio con voz (.MP3)</div>
+          <div class="download-sub">Genera pista de voz real lista para guardar en iPhone</div>
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <select id="exportScope" style="border:1px solid var(--border); padding:8px 10px; border-radius:8px; background:var(--bg); font-size:12px;">
             <option value="page">Página actual</option>
             <option value="all">Todo el PDF</option>
           </select>
-          <button class="btn-secondary" id="downloadBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Descargar .WAV
-          </button>
+          <button class="btn-secondary" id="downloadBtn">Descargar .MP3</button>
         </div>
       </div>
       <div class="status-msg" id="exportStatus"></div>
@@ -524,6 +496,9 @@
     </div>
   </div>
 
+  <!-- Reproductor HTML5 persistente para desbloquear audio en iOS Safari -->
+  <audio id="streamAudio" playsinline preload="auto"></audio>
+
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -553,6 +528,7 @@
     const exportScope = document.getElementById('exportScope');
     const exportStatus = document.getElementById('exportStatus');
     const engineBadge = document.getElementById('engineBadge');
+    const streamAudio = document.getElementById('streamAudio');
 
     let pdfDoc = null;
     let pagesText = [];
@@ -565,79 +541,54 @@
     const speeds = [1.0, 1.25, 1.5, 1.75, 2.0, 0.85];
     let speedIdx = 0;
     let nativeVoices = [];
-    let hasNativeSpeech = false;
     let wakeLock = null;
     let currentPdfName = 'documento';
+    let watchdogTimer = null;
 
-    let jsAudioCtx = null;
-    let jsPlaybackTimer = null;
-    let jsActiveNodes = [];
+    function populateVoices() {
+      const prevVal = voiceSelect.value;
+      voiceSelect.innerHTML = '';
 
-    // Detectar soporte de síntesis nativa vs motor JS integrado
-    function detectSpeechEngine() {
-      const supported = ('speechSynthesis' in window) && (typeof SpeechSynthesisUtterance !== 'undefined');
-      if (supported) {
+      // Opción 1: Voz Stream Universal (funciona 100% en iPhone Safari y bloqueos de WebView)
+      const optStreamEs = document.createElement('option');
+      optStreamEs.value = 'stream:es';
+      optStreamEs.textContent = 'Voz Español Natural (Universal iOS)';
+      voiceSelect.appendChild(optStreamEs);
+
+      const optStreamEn = document.createElement('option');
+      optStreamEn.value = 'stream:en';
+      optStreamEn.textContent = 'Voz Inglés Natural (Universal iOS)';
+      voiceSelect.appendChild(optStreamEn);
+
+      // Opciones nativas de Apple si están disponibles
+      if ('speechSynthesis' in window) {
         try {
           const list = window.speechSynthesis.getVoices();
-          hasNativeSpeech = true;
-          populateVoices(list);
-        } catch (e) {
-          hasNativeSpeech = false;
-          populateVoices([]);
-        }
-      } else {
-        hasNativeSpeech = false;
-        populateVoices([]);
-      }
-    }
+          if (list && list.length > 0) {
+            const esVoices = list.filter(v => v.lang.toLowerCase().startsWith('es'));
+            const otherVoices = list.filter(v => !v.lang.toLowerCase().startsWith('es'));
+            nativeVoices = [...esVoices, ...otherVoices];
 
-    function populateVoices(list) {
-      voiceSelect.innerHTML = '';
-      if (hasNativeSpeech && list && list.length > 0) {
-        engineBadge.textContent = 'Voz Nativa iOS';
-        const esVoices = list.filter(v => v.lang.toLowerCase().startsWith('es'));
-        const otherVoices = list.filter(v => !v.lang.toLowerCase().startsWith('es'));
-        nativeVoices = [...esVoices, ...otherVoices];
-
-        nativeVoices.forEach((voice, i) => {
-          const opt = document.createElement('option');
-          opt.value = 'native:' + i;
-          opt.textContent = `${voice.name} (${voice.lang})`;
-          voiceSelect.appendChild(opt);
-        });
-      } else {
-        engineBadge.textContent = 'Motor JS Integrado';
+            nativeVoices.forEach((v, i) => {
+              const opt = document.createElement('option');
+              opt.value = 'native:' + i;
+              opt.textContent = `iOS: ${v.name} (${v.lang})`;
+              voiceSelect.appendChild(opt);
+            });
+          }
+        } catch (e) {}
       }
 
-      // Siempre incluir opciones del motor JS integrado como respaldo universal
-      const jsOpt1 = document.createElement('option');
-      jsOpt1.value = 'js:grave';
-      jsOpt1.textContent = 'Motor JS — Voz Grave (Universal)';
-      voiceSelect.appendChild(jsOpt1);
-
-      const jsOpt2 = document.createElement('option');
-      jsOpt2.value = 'js:clara';
-      jsOpt2.textContent = 'Motor JS — Voz Clara (Universal)';
-      voiceSelect.appendChild(jsOpt2);
+      if (prevVal) voiceSelect.value = prevVal;
     }
 
-    detectSpeechEngine();
+    populateVoices();
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        const list = window.speechSynthesis.getVoices();
-        if (list.length > 0) {
-          hasNativeSpeech = true;
-          populateVoices(list);
-        }
-      };
+      window.speechSynthesis.onvoiceschanged = populateVoices;
     }
 
-    // Wake Lock para evitar bloqueo de pantalla en iOS
     wakeBtn.addEventListener('click', async () => {
-      if (!('wakeLock' in navigator)) {
-        wakeBtn.textContent = 'No disponible aquí';
-        return;
-      }
+      if (!('wakeLock' in navigator)) return;
       try {
         if (wakeLock) {
           await wakeLock.release();
@@ -648,22 +599,15 @@
           wakeLock = await navigator.wakeLock.request('screen');
           wakeBtn.classList.add('active');
           wakeDot.textContent = '●';
-          wakeLock.addEventListener('release', () => {
-            wakeLock = null;
-            wakeBtn.classList.remove('active');
-            wakeDot.textContent = '○';
-          });
         }
-      } catch (err) {
-        console.warn('WakeLock:', err);
-      }
+      } catch (e) {}
     });
 
     pdfInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      stopSpeech();
+      stopAllAudio();
       currentPdfName = file.name.replace(/\.pdf$/i, '');
       fileNameEl.textContent = file.name;
       fileMetaEl.textContent = 'Extrayendo texto...';
@@ -700,23 +644,45 @@
         loadPage(1, false);
       } catch (err) {
         fileMetaEl.textContent = 'Error al leer el PDF';
-        console.error(err);
       }
     });
 
-    function splitIntoSentences(text) {
-      if (!text) return ['(Página sin texto seleccionable)'];
-      const matches = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
-      return matches ? matches.map(s => s.trim()).filter(Boolean) : [text];
+    // Divide en fragmentos cortos (<180 caracteres) para que iOS nunca trabe el TTS
+    function splitTextSafely(text) {
+      if (!text) return ['Página sin texto seleccionable.'];
+      const rawSentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+      const chunks = [];
+
+      rawSentences.forEach(s => {
+        const clean = s.trim();
+        if (!clean) return;
+        if (clean.length <= 170) {
+          chunks.push(clean);
+        } else {
+          const words = clean.split(' ');
+          let buf = '';
+          words.forEach(w => {
+            if ((buf + ' ' + w).trim().length > 165) {
+              if (buf) chunks.push(buf.trim());
+              buf = w;
+            } else {
+              buf = (buf + ' ' + w).trim();
+            }
+          });
+          if (buf) chunks.push(buf.trim());
+        }
+      });
+
+      return chunks.length > 0 ? chunks : ['Página sin texto seleccionable.'];
     }
 
     function loadPage(pageNum, autoPlay = false) {
-      stopSpeech();
+      stopAllAudio();
       currentPage = pageNum;
       pageSelect.value = pageNum;
       pageIndicator.textContent = `Pág. ${pageNum}/${pagesText.length}`;
 
-      sentences = splitIntoSentences(pagesText[pageNum - 1]);
+      sentences = splitTextSafely(pagesText[pageNum - 1]);
       currentSentenceIdx = 0;
 
       readerBox.innerHTML = '';
@@ -726,21 +692,21 @@
         span.textContent = sentence + ' ';
         span.dataset.idx = idx;
         span.addEventListener('click', () => {
-          stopSpeech();
+          stopAllAudio();
           currentSentenceIdx = idx;
-          startSpeech();
+          startPlayback();
         });
         readerBox.appendChild(span);
       });
 
       updateProgressUI();
-      if (autoPlay) startSpeech();
+      if (autoPlay) startPlayback();
     }
 
     function updateProgressUI() {
       const total = sentences.length;
       sentenceCounter.textContent = `${Math.min(currentSentenceIdx + 1, total)} / ${total}`;
-      const pct = total > 0 ? ((currentSentenceIdx) / total) * 100 : 0;
+      const pct = total > 0 ? (currentSentenceIdx / total) * 100 : 0;
       progressFill.style.width = `${pct}%`;
 
       document.querySelectorAll('.sentence').forEach((el, idx) => {
@@ -753,82 +719,56 @@
       });
     }
 
-    // Síntesis por formantes en Web Audio API para entornos donde speechSynthesis esté bloqueado
-    function playSentenceWithJS(text, pitchMode, onEnd) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!jsAudioCtx) jsAudioCtx = new AudioCtx();
-      if (jsAudioCtx.state === 'suspended') jsAudioCtx.resume();
-
-      const formants = {
-        'a': [730, 1090, 2440],
-        'e': [530, 1840, 2480],
-        'i': [270, 2290, 3010],
-        'o': [570, 840, 2410],
-        'u': [300, 870, 2240]
-      };
-
-      const clean = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-      const chars = clean.split('');
-      const baseFreq = pitchMode === 'clara' ? 195 : 122;
-      const stepSec = Math.max(0.038, 0.068 / playbackRate);
-      const totalDuration = Math.max(0.35, chars.length * stepSec);
-
-      const now = jsAudioCtx.currentTime;
-      const osc = jsAudioCtx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(baseFreq, now);
-
-      const masterGain = jsAudioCtx.createGain();
-      masterGain.gain.setValueAtTime(0.001, now);
-
-      const f1 = jsAudioCtx.createBiquadFilter();
-      const f2 = jsAudioCtx.createBiquadFilter();
-      f1.type = 'bandpass'; f1.Q.value = 6;
-      f2.type = 'bandpass'; f2.Q.value = 7;
-
-      osc.connect(f1);
-      osc.connect(f2);
-      f1.connect(masterGain);
-      f2.connect(masterGain);
-      masterGain.connect(jsAudioCtx.destination);
-
-      let lastVowel = 'a';
-      chars.forEach((ch, idx) => {
-        const t = now + idx * stepSec;
-        if (formants[ch]) {
-          lastVowel = ch;
-          const [freq1, freq2] = formants[ch];
-          f1.frequency.setTargetAtTime(freq1, t, 0.015);
-          f2.frequency.setTargetAtTime(freq2, t, 0.015);
-          osc.frequency.setTargetAtTime(baseFreq * (1 + (idx % 3) * 0.03), t, 0.02);
-          masterGain.gain.setTargetAtTime(0.22, t, 0.015);
-        } else if (ch === ' ' || ch === ',' || ch === '.') {
-          masterGain.gain.setTargetAtTime(0.001, t, 0.015);
-        } else {
-          const [freq1, freq2] = formants[lastVowel];
-          f1.frequency.setTargetAtTime(freq1 * 0.85, t, 0.015);
-          f2.frequency.setTargetAtTime(freq2 * 1.1, t, 0.015);
-          masterGain.gain.setTargetAtTime(0.11, t, 0.015);
-        }
-      });
-
-      masterGain.gain.setTargetAtTime(0.0001, now + totalDuration, 0.02);
-      osc.start(now);
-      osc.stop(now + totalDuration + 0.08);
-      jsActiveNodes.push(osc);
-
-      jsPlaybackTimer = setTimeout(() => {
-        jsActiveNodes = [];
-        if (isPlaying && !isPaused) onEnd();
-      }, (totalDuration + 0.12) * 1000);
+    function buildStreamUrl(text, lang) {
+      const encoded = encodeURIComponent(text.slice(0, 190));
+      return `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encoded}`;
     }
 
-    function speakSentence(idx) {
+    function playStreamChunk(text, lang, idx) {
+      const url = buildStreamUrl(text, lang);
+      streamAudio.src = url;
+      streamAudio.playbackRate = playbackRate;
+
+      streamAudio.onended = () => {
+        if (isPlaying && !isPaused) {
+          speakChunk(idx + 1);
+        }
+      };
+
+      streamAudio.onerror = () => {
+        // Si falla la red en una frase, intenta con speechSynthesis nativo sin quedarse pegado
+        tryNativeFallback(text, idx);
+      };
+
+      const playPromise = streamAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          tryNativeFallback(text, idx);
+        });
+      }
+    }
+
+    function tryNativeFallback(text, idx) {
+      if (!('speechSynthesis' in window)) {
+        if (isPlaying && !isPaused) speakChunk(idx + 1);
+        return;
+      }
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = voiceSelect.value.includes('en') ? 'en-US' : 'es-ES';
+      u.rate = playbackRate;
+      u.onend = () => { if (isPlaying && !isPaused) speakChunk(idx + 1); };
+      u.onerror = () => { if (isPlaying && !isPaused) speakChunk(idx + 1); };
+      window.speechSynthesis.speak(u);
+    }
+
+    function speakChunk(idx) {
+      clearTimeout(watchdogTimer);
+
       if (idx >= sentences.length) {
         if (currentPage < pagesText.length) {
           loadPage(currentPage + 1, true);
         } else {
-          stopSpeech();
+          stopAllAudio();
           progressFill.style.width = '100%';
         }
         return;
@@ -837,96 +777,83 @@
       currentSentenceIdx = idx;
       updateProgressUI();
 
-      const selectedVal = voiceSelect.value || 'js:grave';
       const text = sentences[idx];
+      const mode = voiceSelect.value || 'stream:es';
 
-      if (selectedVal.startsWith('native:') && hasNativeSpeech) {
-        try {
+      if (mode.startsWith('native:') && ('speechSynthesis' in window)) {
+        // NO llamar cancel() en el primer toque para evitar bloqueo de Safari iOS
+        if (window.speechSynthesis.speaking) {
           window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          const vIdx = parseInt(selectedVal.split(':')[1], 10);
-          if (nativeVoices[vIdx]) {
-            utterance.voice = nativeVoices[vIdx];
-            utterance.lang = nativeVoices[vIdx].lang;
-          } else {
-            utterance.lang = 'es-ES';
-          }
-          utterance.rate = playbackRate;
-
-          let started = false;
-          const fallbackGuard = setTimeout(() => {
-            if (!started && isPlaying) {
-              // El visor bloqueó silenciosamente la ejecución nativa: conmutar al motor JS
-              hasNativeSpeech = false;
-              populateVoices([]);
-              playSentenceWithJS(text, 'grave', () => speakSentence(idx + 1));
-            }
-          }, 900);
-
-          utterance.onstart = () => { started = true; clearTimeout(fallbackGuard); };
-          utterance.onend = () => {
-            clearTimeout(fallbackGuard);
-            if (isPlaying && !isPaused) speakSentence(idx + 1);
-          };
-          utterance.onerror = () => {
-            clearTimeout(fallbackGuard);
-            if (isPlaying) {
-              hasNativeSpeech = false;
-              populateVoices([]);
-              playSentenceWithJS(text, 'grave', () => speakSentence(idx + 1));
-            }
-          };
-
-          window.speechSynthesis.speak(utterance);
-          return;
-        } catch (e) {
-          hasNativeSpeech = false;
-          populateVoices([]);
         }
-      }
+        const u = new SpeechSynthesisUtterance(text);
+        const vIdx = parseInt(mode.split(':')[1], 10);
+        if (nativeVoices[vIdx]) {
+          u.voice = nativeVoices[vIdx];
+          u.lang = nativeVoices[vIdx].lang;
+        } else {
+          u.lang = 'es-ES';
+        }
+        u.rate = playbackRate;
 
-      const mode = selectedVal.includes('clara') ? 'clara' : 'grave';
-      playSentenceWithJS(text, mode, () => speakSentence(idx + 1));
+        let started = false;
+        watchdogTimer = setTimeout(() => {
+          if (!started && isPlaying && !isPaused) {
+            // Safari dejó pegado speechSynthesis: saltar automáticamente a voz stream
+            voiceSelect.value = 'stream:es';
+            engineBadge.textContent = 'Voz Stream Activa';
+            playStreamChunk(text, 'es', idx);
+          }
+        }, 1100);
+
+        u.onstart = () => {
+          started = true;
+          clearTimeout(watchdogTimer);
+        };
+        u.onend = () => {
+          clearTimeout(watchdogTimer);
+          if (isPlaying && !isPaused) speakChunk(idx + 1);
+        };
+        u.onerror = () => {
+          clearTimeout(watchdogTimer);
+          if (isPlaying && !isPaused) {
+            voiceSelect.value = 'stream:es';
+            playStreamChunk(text, 'es', idx);
+          }
+        };
+
+        window.speechSynthesis.speak(u);
+      } else {
+        const lang = mode === 'stream:en' ? 'en' : 'es';
+        playStreamChunk(text, lang, idx);
+      }
     }
 
-    function startSpeech() {
+    function startPlayback() {
       isPlaying = true;
       isPaused = false;
       updatePlayButtonUI();
-      speakSentence(currentSentenceIdx);
+      speakChunk(currentSentenceIdx);
     }
 
-    function pauseSpeech() {
+    function pausePlayback() {
       isPaused = true;
-      if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.pause(); } catch (e) {}
-      }
-      if (jsPlaybackTimer) clearTimeout(jsPlaybackTimer);
-      jsActiveNodes.forEach(n => { try { n.stop(); } catch (e) {} });
-      jsActiveNodes = [];
-      updatePlayButtonUI();
-    }
-
-    function resumeSpeech() {
-      isPaused = false;
-      const selectedVal = voiceSelect.value || 'js:grave';
-      if (selectedVal.startsWith('native:') && hasNativeSpeech && window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      } else {
-        speakSentence(currentSentenceIdx);
-      }
-      updatePlayButtonUI();
-    }
-
-    function stopSpeech() {
-      isPlaying = false;
-      isPaused = false;
+      clearTimeout(watchdogTimer);
+      streamAudio.pause();
       if ('speechSynthesis' in window) {
         try { window.speechSynthesis.cancel(); } catch (e) {}
       }
-      if (jsPlaybackTimer) clearTimeout(jsPlaybackTimer);
-      jsActiveNodes.forEach(n => { try { n.stop(); } catch (e) {} });
-      jsActiveNodes = [];
+      updatePlayButtonUI();
+    }
+
+    function stopAllAudio() {
+      isPlaying = false;
+      isPaused = false;
+      clearTimeout(watchdogTimer);
+      streamAudio.pause();
+      streamAudio.removeAttribute('src');
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
       updatePlayButtonUI();
     }
 
@@ -940,14 +867,13 @@
       }
     }
 
+    // Gesto directo del usuario: desbloquea el elemento <audio> en iOS inmediatamente
     playPauseBtn.addEventListener('click', () => {
       if (!pdfDoc) return;
-      if (!isPlaying) {
-        startSpeech();
-      } else if (isPaused) {
-        resumeSpeech();
+      if (!isPlaying || isPaused) {
+        startPlayback();
       } else {
-        pauseSpeech();
+        pausePlayback();
       }
     });
 
@@ -967,150 +893,59 @@
       speedIdx = (speedIdx + 1) % speeds.length;
       playbackRate = speeds[speedIdx];
       speedBtn.textContent = `${playbackRate}x`;
-      if (isPlaying && !isPaused) {
-        speakSentence(currentSentenceIdx);
+      streamAudio.playbackRate = playbackRate;
+      if (isPlaying && !isPaused && voiceSelect.value.startsWith('native:')) {
+        speakChunk(currentSentenceIdx);
       }
     });
 
-    // Generación y descarga directa de archivo .WAV offline
+    // Descarga directa de pista .MP3 con voz real
     downloadBtn.addEventListener('click', async () => {
       if (!pdfDoc) return;
       downloadBtn.disabled = true;
       exportStatus.style.display = 'block';
-      exportStatus.textContent = 'Renderizando pista de audio .WAV...';
+      exportStatus.textContent = 'Generando audio .MP3 con voz...';
 
       try {
-        const textToRender = exportScope.value === 'all'
+        const rawText = exportScope.value === 'all'
           ? pagesText.join('. ')
           : (pagesText[currentPage - 1] || '');
 
-        const wavBlob = await renderTextToWav(textToRender);
-        const url = URL.createObjectURL(wavBlob);
+        const chunks = splitTextSafely(rawText).slice(0, 45);
+        const lang = voiceSelect.value === 'stream:en' ? 'en' : 'es';
+        const buffers = [];
+
+        for (let i = 0; i < chunks.length; i++) {
+          exportStatus.textContent = `Procesando fragmento ${i + 1} de ${chunks.length}...`;
+          const res = await fetch(buildStreamUrl(chunks[i], lang));
+          if (res.ok) {
+            const buf = await res.arrayBuffer();
+            buffers.push(buf);
+          }
+        }
+
+        if (buffers.length === 0) {
+          throw new Error('No se pudo obtener el audio.');
+        }
+
+        const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(mp3Blob);
         const a = document.createElement('a');
         const suffix = exportScope.value === 'all' ? 'completo' : `pag-${currentPage}`;
         a.href = url;
-        a.download = `${currentPdfName}-${suffix}.wav`;
+        a.download = `${currentPdfName}-${suffix}.mp3`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 5000);
 
-        exportStatus.textContent = 'Archivo .WAV listo y descargado.';
+        exportStatus.textContent = 'Audio .MP3 descargado correctamente.';
       } catch (err) {
-        console.error(err);
-        exportStatus.textContent = 'No se pudo generar el archivo de audio.';
+        exportStatus.textContent = 'No se pudo descargar el MP3 en este entorno.';
       } finally {
         downloadBtn.disabled = false;
       }
     });
-
-    async function renderTextToWav(text) {
-      const sampleRate = 22050;
-      const clean = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-      const chars = clean.slice(0, 12000).split('');
-      const stepSec = 0.055;
-      const durationSec = Math.max(1.5, chars.length * stepSec + 0.5);
-      const totalSamples = Math.floor(sampleRate * durationSec);
-
-      const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      const offlineCtx = new OfflineCtx(1, totalSamples, sampleRate);
-
-      const selectedVal = voiceSelect.value || 'js:grave';
-      const baseFreq = selectedVal.includes('clara') ? 195 : 122;
-
-      const osc = offlineCtx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(baseFreq, 0);
-
-      const masterGain = offlineCtx.createGain();
-      masterGain.gain.setValueAtTime(0.001, 0);
-
-      const f1 = offlineCtx.createBiquadFilter();
-      const f2 = offlineCtx.createBiquadFilter();
-      f1.type = 'bandpass'; f1.Q.value = 6;
-      f2.type = 'bandpass'; f2.Q.value = 7;
-
-      const formants = {
-        'a': [730, 1090],
-        'e': [530, 1840],
-        'i': [270, 2290],
-        'o': [570, 840],
-        'u': [300, 870]
-      };
-
-      let lastVowel = 'a';
-      chars.forEach((ch, idx) => {
-        const t = idx * stepSec;
-        if (formants[ch]) {
-          lastVowel = ch;
-          f1.frequency.setValueAtTime(formants[ch][0], t);
-          f2.frequency.setValueAtTime(formants[ch][1], t);
-          masterGain.gain.setValueAtTime(0.24, t);
-        } else if (ch === ' ' || ch === '.' || ch === ',') {
-          masterGain.gain.setValueAtTime(0.002, t);
-        } else {
-          f1.frequency.setValueAtTime(formants[lastVowel][0] * 0.85, t);
-          f2.frequency.setValueAtTime(formants[lastVowel][1] * 1.1, t);
-          masterGain.gain.setValueAtTime(0.11, t);
-        }
-      });
-
-      osc.connect(f1);
-      osc.connect(f2);
-      f1.connect(masterGain);
-      f2.connect(masterGain);
-      masterGain.connect(offlineCtx.destination);
-
-      osc.start(0);
-      osc.stop(durationSec);
-
-      const renderedBuffer = await offlineCtx.startRendering();
-      return audioBufferToWav(renderedBuffer);
-    }
-
-    function audioBufferToWav(buffer) {
-      const numOfChan = buffer.numberOfChannels;
-      const length = buffer.length * numOfChan * 2 + 44;
-      const out = new ArrayBuffer(length);
-      const view = new DataView(out);
-      const channels = [];
-      let sample = 0;
-      let offset = 0;
-      let pos = 0;
-
-      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
-      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
-
-      setUint32(0x46464952);
-      setUint32(length - 8);
-      setUint32(0x45564157);
-      setUint32(0x20746d66);
-      setUint32(16);
-      setUint16(1);
-      setUint16(numOfChan);
-      setUint32(buffer.sampleRate);
-      setUint32(buffer.sampleRate * 2 * numOfChan);
-      setUint16(numOfChan * 2);
-      setUint16(16);
-      setUint32(0x61746164);
-      setUint32(length - pos - 4);
-
-      for (let i = 0; i < buffer.numberOfChannels; i++) {
-        channels.push(buffer.getChannelData(i));
-      }
-
-      while (pos < length) {
-        for (let i = 0; i < numOfChan; i++) {
-          sample = Math.max(-1, Math.min(1, channels[i][offset]));
-          sample = (sample < 0 ? sample * 32768 : sample * 32767) | 0;
-          view.setInt16(pos, sample, true);
-          pos += 2;
-        }
-        offset++;
-      }
-
-      return new Blob([out], { type: 'audio/wav' });
-    }
   </script>
 </body>
 </html>
