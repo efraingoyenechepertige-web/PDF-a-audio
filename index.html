@@ -18,9 +18,11 @@
       --text-muted: #a1a1aa;
       --accent: #e4e4e7;
       --accent-text: #09090b;
-      --highlight: rgba(255, 255, 255, 0.10);
+      --highlight: rgba(255, 255, 255, 0.12);
       --badge-bg: rgba(16, 185, 129, 0.14);
       --badge-text: #34d399;
+      --warn-bg: rgba(245, 158, 11, 0.14);
+      --warn-text: #fbbf24;
     }
 
     * {
@@ -216,6 +218,17 @@
     select option {
       background: var(--surface);
       color: var(--text);
+    }
+
+    .diagnostic-bar {
+      display: none;
+      background: var(--warn-bg);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--warn-text);
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.4;
     }
 
     .reader-box {
@@ -428,7 +441,7 @@
 
     <div class="settings-grid" id="settingsGrid">
       <div class="field">
-        <label for="voiceSelect">Motor de Voz</label>
+        <label for="voiceSelect">Voz iOS / Idioma</label>
         <select id="voiceSelect"></select>
       </div>
       <div class="field">
@@ -437,13 +450,15 @@
       </div>
     </div>
 
+    <div class="diagnostic-bar" id="diagBar"></div>
+
     <div class="reader-box" id="readerBox"></div>
 
     <div class="download-card" id="downloadCard">
       <div class="download-row">
         <div>
-          <div class="download-title">Descargar audio con voz (.MP3)</div>
-          <div class="download-sub">Genera pista de voz real lista para guardar en iPhone</div>
+          <div class="download-title">Exportar audio (.MP3)</div>
+          <div class="download-sub">Genera pista de voz descargable en tu iPhone</div>
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
           <select id="exportScope" style="border:1px solid var(--border); padding:8px 10px; border-radius:8px; background:var(--bg); font-size:12px;">
@@ -496,9 +511,6 @@
     </div>
   </div>
 
-  <!-- Reproductor HTML5 persistente para desbloquear audio en iOS Safari -->
-  <audio id="streamAudio" playsinline preload="auto"></audio>
-
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -528,7 +540,7 @@
     const exportScope = document.getElementById('exportScope');
     const exportStatus = document.getElementById('exportStatus');
     const engineBadge = document.getElementById('engineBadge');
-    const streamAudio = document.getElementById('streamAudio');
+    const diagBar = document.getElementById('diagBar');
 
     let pdfDoc = null;
     let pagesText = [];
@@ -543,48 +555,67 @@
     let nativeVoices = [];
     let wakeLock = null;
     let currentPdfName = 'documento';
-    let watchdogTimer = null;
+    let currentUtterance = null;
+    let iosKeepAliveTimer = null;
+
+    function showDiag(msg) {
+      if (!msg) {
+        diagBar.style.display = 'none';
+        return;
+      }
+      diagBar.style.display = 'block';
+      diagBar.textContent = msg;
+    }
 
     function populateVoices() {
       const prevVal = voiceSelect.value;
       voiceSelect.innerHTML = '';
 
-      // Opción 1: Voz Stream Universal (funciona 100% en iPhone Safari y bloqueos de WebView)
-      const optStreamEs = document.createElement('option');
-      optStreamEs.value = 'stream:es';
-      optStreamEs.textContent = 'Voz Español Natural (Universal iOS)';
-      voiceSelect.appendChild(optStreamEs);
-
-      const optStreamEn = document.createElement('option');
-      optStreamEn.value = 'stream:en';
-      optStreamEn.textContent = 'Voz Inglés Natural (Universal iOS)';
-      voiceSelect.appendChild(optStreamEn);
-
-      // Opciones nativas de Apple si están disponibles
       if ('speechSynthesis' in window) {
-        try {
-          const list = window.speechSynthesis.getVoices();
-          if (list && list.length > 0) {
-            const esVoices = list.filter(v => v.lang.toLowerCase().startsWith('es'));
-            const otherVoices = list.filter(v => !v.lang.toLowerCase().startsWith('es'));
-            nativeVoices = [...esVoices, ...otherVoices];
+        const list = window.speechSynthesis.getVoices();
+        if (list && list.length > 0) {
+          const esVoices = list.filter(v => v.lang.toLowerCase().startsWith('es'));
+          const otherVoices = list.filter(v => !v.lang.toLowerCase().startsWith('es'));
+          nativeVoices = [...esVoices, ...otherVoices];
 
-            nativeVoices.forEach((v, i) => {
-              const opt = document.createElement('option');
-              opt.value = 'native:' + i;
-              opt.textContent = `iOS: ${v.name} (${v.lang})`;
-              voiceSelect.appendChild(opt);
-            });
-          }
-        } catch (e) {}
+          nativeVoices.forEach((v, i) => {
+            const opt = document.createElement('option');
+            opt.value = 'native:' + i;
+            opt.textContent = `${v.name} (${v.lang})`;
+            voiceSelect.appendChild(opt);
+          });
+          engineBadge.textContent = `${nativeVoices.length} Voces iOS`;
+        }
       }
 
-      if (prevVal) voiceSelect.value = prevVal;
+      if (voiceSelect.options.length === 0) {
+        const defEs = document.createElement('option');
+        defEs.value = 'lang:es-ES';
+        defEs.textContent = 'Español (Predeterminado iOS)';
+        voiceSelect.appendChild(defEs);
+
+        const defMx = document.createElement('option');
+        defMx.value = 'lang:es-MX';
+        defMx.textContent = 'Español México (iOS)';
+        voiceSelect.appendChild(defMx);
+
+        const defEn = document.createElement('option');
+        defEn.value = 'lang:en-US';
+        defEn.textContent = 'Inglés (iOS)';
+        voiceSelect.appendChild(defEn);
+      }
+
+      if (prevVal && Array.from(voiceSelect.options).some(o => o.value === prevVal)) {
+        voiceSelect.value = prevVal;
+      }
     }
 
     populateVoices();
     if ('speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = populateVoices;
+      // iOS a veces tarda 300ms en poblar getVoices()
+      setTimeout(populateVoices, 350);
+      setTimeout(populateVoices, 1000);
     }
 
     wakeBtn.addEventListener('click', async () => {
@@ -607,7 +638,8 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      stopAllAudio();
+      stopAllSpeech();
+      showDiag('');
       currentPdfName = file.name.replace(/\.pdf$/i, '');
       fileNameEl.textContent = file.name;
       fileMetaEl.textContent = 'Extrayendo texto...';
@@ -647,7 +679,6 @@
       }
     });
 
-    // Divide en fragmentos cortos (<180 caracteres) para que iOS nunca trabe el TTS
     function splitTextSafely(text) {
       if (!text) return ['Página sin texto seleccionable.'];
       const rawSentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
@@ -656,13 +687,13 @@
       rawSentences.forEach(s => {
         const clean = s.trim();
         if (!clean) return;
-        if (clean.length <= 170) {
+        if (clean.length <= 160) {
           chunks.push(clean);
         } else {
           const words = clean.split(' ');
           let buf = '';
           words.forEach(w => {
-            if ((buf + ' ' + w).trim().length > 165) {
+            if ((buf + ' ' + w).trim().length > 155) {
               if (buf) chunks.push(buf.trim());
               buf = w;
             } else {
@@ -677,7 +708,7 @@
     }
 
     function loadPage(pageNum, autoPlay = false) {
-      stopAllAudio();
+      stopAllSpeech();
       currentPage = pageNum;
       pageSelect.value = pageNum;
       pageIndicator.textContent = `Pág. ${pageNum}/${pagesText.length}`;
@@ -692,7 +723,7 @@
         span.textContent = sentence + ' ';
         span.dataset.idx = idx;
         span.addEventListener('click', () => {
-          stopAllAudio();
+          stopAllSpeech();
           currentSentenceIdx = idx;
           startPlayback();
         });
@@ -719,58 +750,22 @@
       });
     }
 
-    function buildStreamUrl(text, lang) {
-      const encoded = encodeURIComponent(text.slice(0, 190));
-      return `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encoded}`;
-    }
-
-    function playStreamChunk(text, lang, idx) {
-      const url = buildStreamUrl(text, lang);
-      streamAudio.src = url;
-      streamAudio.playbackRate = playbackRate;
-
-      streamAudio.onended = () => {
-        if (isPlaying && !isPaused) {
-          speakChunk(idx + 1);
-        }
-      };
-
-      streamAudio.onerror = () => {
-        // Si falla la red en una frase, intenta con speechSynthesis nativo sin quedarse pegado
-        tryNativeFallback(text, idx);
-      };
-
-      const playPromise = streamAudio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          tryNativeFallback(text, idx);
-        });
-      }
-    }
-
-    function tryNativeFallback(text, idx) {
-      if (!('speechSynthesis' in window)) {
-        if (isPlaying && !isPaused) speakChunk(idx + 1);
-        return;
-      }
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = voiceSelect.value.includes('en') ? 'en-US' : 'es-ES';
-      u.rate = playbackRate;
-      u.onend = () => { if (isPlaying && !isPaused) speakChunk(idx + 1); };
-      u.onerror = () => { if (isPlaying && !isPaused) speakChunk(idx + 1); };
-      window.speechSynthesis.speak(u);
-    }
-
-    function speakChunk(idx) {
-      clearTimeout(watchdogTimer);
+    function speakNativeChunk(idx) {
+      clearInterval(iosKeepAliveTimer);
 
       if (idx >= sentences.length) {
         if (currentPage < pagesText.length) {
           loadPage(currentPage + 1, true);
         } else {
-          stopAllAudio();
+          stopAllSpeech();
           progressFill.style.width = '100%';
         }
+        return;
+      }
+
+      if (!('speechSynthesis' in window)) {
+        showDiag('Este navegador bloqueó speechSynthesis. Abre la página directamente en Safari.');
+        stopAllSpeech();
         return;
       }
 
@@ -778,79 +773,93 @@
       updateProgressUI();
 
       const text = sentences[idx];
-      const mode = voiceSelect.value || 'stream:es';
+      const u = new SpeechSynthesisUtterance(text);
+      // Guardar referencia global evita que el Garbage Collector de iOS Safari corte la voz a mitad de frase
+      currentUtterance = u;
 
-      if (mode.startsWith('native:') && ('speechSynthesis' in window)) {
-        // NO llamar cancel() en el primer toque para evitar bloqueo de Safari iOS
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
-        const u = new SpeechSynthesisUtterance(text);
-        const vIdx = parseInt(mode.split(':')[1], 10);
+      const selected = voiceSelect.value || '';
+      if (selected.startsWith('native:')) {
+        const vIdx = parseInt(selected.split(':')[1], 10);
         if (nativeVoices[vIdx]) {
           u.voice = nativeVoices[vIdx];
           u.lang = nativeVoices[vIdx].lang;
         } else {
           u.lang = 'es-ES';
         }
-        u.rate = playbackRate;
-
-        let started = false;
-        watchdogTimer = setTimeout(() => {
-          if (!started && isPlaying && !isPaused) {
-            // Safari dejó pegado speechSynthesis: saltar automáticamente a voz stream
-            voiceSelect.value = 'stream:es';
-            engineBadge.textContent = 'Voz Stream Activa';
-            playStreamChunk(text, 'es', idx);
-          }
-        }, 1100);
-
-        u.onstart = () => {
-          started = true;
-          clearTimeout(watchdogTimer);
-        };
-        u.onend = () => {
-          clearTimeout(watchdogTimer);
-          if (isPlaying && !isPaused) speakChunk(idx + 1);
-        };
-        u.onerror = () => {
-          clearTimeout(watchdogTimer);
-          if (isPlaying && !isPaused) {
-            voiceSelect.value = 'stream:es';
-            playStreamChunk(text, 'es', idx);
-          }
-        };
-
-        window.speechSynthesis.speak(u);
+      } else if (selected.startsWith('lang:')) {
+        u.lang = selected.split(':')[1];
       } else {
-        const lang = mode === 'stream:en' ? 'en' : 'es';
-        playStreamChunk(text, lang, idx);
+        u.lang = 'es-ES';
       }
+
+      u.volume = 1.0;
+      u.rate = playbackRate;
+      u.pitch = 1.0;
+
+      u.onstart = () => {
+        showDiag('');
+        engineBadge.textContent = 'Leyendo con iOS';
+      };
+
+      u.onend = () => {
+        clearInterval(iosKeepAliveTimer);
+        currentUtterance = null;
+        if (isPlaying && !isPaused) {
+          // Pequeña pausa de 60ms para que Safari iOS limpie el búfer antes de la siguiente frase
+          setTimeout(() => {
+            if (isPlaying && !isPaused) speakNativeChunk(idx + 1);
+          }, 60);
+        }
+      };
+
+      u.onerror = (event) => {
+        clearInterval(iosKeepAliveTimer);
+        currentUtterance = null;
+        if (event.error === 'interrupted' || event.error === 'canceled') {
+          return;
+        }
+        showDiag(`Error de voz iOS (${event.error}). Verifica que el volumen multimedia del iPhone esté alto y sin modo silencio.`);
+        stopAllSpeech();
+      };
+
+      // Workaround oficial para bug de iOS Safari donde speechSynthesis se congela tras 15 segundos
+      iosKeepAliveTimer = setInterval(() => {
+        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      }, 10000);
+
+      window.speechSynthesis.speak(u);
     }
 
     function startPlayback() {
       isPlaying = true;
       isPaused = false;
       updatePlayButtonUI();
-      speakChunk(currentSentenceIdx);
+      // Desbloqueo síncrono dentro del gesto táctil del usuario
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+      speakNativeChunk(currentSentenceIdx);
     }
 
     function pausePlayback() {
       isPaused = true;
-      clearTimeout(watchdogTimer);
-      streamAudio.pause();
+      clearInterval(iosKeepAliveTimer);
       if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.cancel(); } catch (e) {}
+        window.speechSynthesis.cancel();
       }
       updatePlayButtonUI();
     }
 
-    function stopAllAudio() {
+    function stopAllSpeech() {
       isPlaying = false;
       isPaused = false;
-      clearTimeout(watchdogTimer);
-      streamAudio.pause();
-      streamAudio.removeAttribute('src');
+      clearInterval(iosKeepAliveTimer);
+      currentUtterance = null;
       if ('speechSynthesis' in window) {
         try { window.speechSynthesis.cancel(); } catch (e) {}
       }
@@ -867,7 +876,6 @@
       }
     }
 
-    // Gesto directo del usuario: desbloquea el elemento <audio> en iOS inmediatamente
     playPauseBtn.addEventListener('click', () => {
       if (!pdfDoc) return;
       if (!isPlaying || isPaused) {
@@ -893,39 +901,41 @@
       speedIdx = (speedIdx + 1) % speeds.length;
       playbackRate = speeds[speedIdx];
       speedBtn.textContent = `${playbackRate}x`;
-      streamAudio.playbackRate = playbackRate;
-      if (isPlaying && !isPaused && voiceSelect.value.startsWith('native:')) {
-        speakChunk(currentSentenceIdx);
+      if (isPlaying && !isPaused) {
+        window.speechSynthesis.cancel();
+        speakNativeChunk(currentSentenceIdx);
       }
     });
 
-    // Descarga directa de pista .MP3 con voz real
+    // Exportación de audio vía Stream TTS con proxy CORS confiable
     downloadBtn.addEventListener('click', async () => {
       if (!pdfDoc) return;
       downloadBtn.disabled = true;
       exportStatus.style.display = 'block';
-      exportStatus.textContent = 'Generando audio .MP3 con voz...';
+      exportStatus.textContent = 'Generando pista de audio .MP3...';
 
       try {
         const rawText = exportScope.value === 'all'
           ? pagesText.join('. ')
           : (pagesText[currentPage - 1] || '');
 
-        const chunks = splitTextSafely(rawText).slice(0, 45);
-        const lang = voiceSelect.value === 'stream:en' ? 'en' : 'es';
+        const chunks = splitTextSafely(rawText).slice(0, 40);
+        const isEn = (voiceSelect.value || '').toLowerCase().includes('en');
+        const lang = isEn ? 'en' : 'es';
         const buffers = [];
 
         for (let i = 0; i < chunks.length; i++) {
-          exportStatus.textContent = `Procesando fragmento ${i + 1} de ${chunks.length}...`;
-          const res = await fetch(buildStreamUrl(chunks[i], lang));
+          exportStatus.textContent = `Sintetizando parte ${i + 1} de ${chunks.length}...`;
+          const targetUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(chunks[i])}`;
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+          const res = await fetch(proxyUrl);
           if (res.ok) {
-            const buf = await res.arrayBuffer();
-            buffers.push(buf);
+            buffers.push(await res.arrayBuffer());
           }
         }
 
         if (buffers.length === 0) {
-          throw new Error('No se pudo obtener el audio.');
+          throw new Error('Sin respuesta del servidor de voz');
         }
 
         const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
@@ -939,9 +949,9 @@
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 5000);
 
-        exportStatus.textContent = 'Audio .MP3 descargado correctamente.';
+        exportStatus.textContent = 'Archivo .MP3 guardado en Descargas.';
       } catch (err) {
-        exportStatus.textContent = 'No se pudo descargar el MP3 en este entorno.';
+        exportStatus.textContent = 'No se pudo descargar el .MP3 en este momento (usa la reproducción en vivo).';
       } finally {
         downloadBtn.disabled = false;
       }
